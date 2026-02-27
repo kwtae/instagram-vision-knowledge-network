@@ -1,0 +1,24 @@
+# Virtual Environments
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local Databases & States
+chroma_db/
+watched_files/
+image_hashes.json
+scraped_history.json
+custom_edges.json
+network_graph.html
+
+# Secrets & Credentials
+cookies.json
+.env
+
+# Logs and IDE
+*.log
+.vscode/
+.idea/
+.DS_Store

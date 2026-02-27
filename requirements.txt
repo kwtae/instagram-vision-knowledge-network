@@ -1,0 +1,9 @@
+mcp[cli]
+pymupdf
+pytesseract
+playwright
+ultralytics
+chromadb
+pillow
+pydantic
+watchdog
