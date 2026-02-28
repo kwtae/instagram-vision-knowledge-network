@@ -245,39 +245,45 @@ export default function GraphPage() {
                     boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
                     backdropFilter: "blur(20px)"
                 }}>
-                    <div style={{ fontWeight: 600, fontSize: "14px", marginBottom: "10px", color: "white", letterSpacing: "-0.01em", wordBreak: "break-all" }}>
-                        {tooltip.node.name || tooltip.node.id || "Unknown Object"}
+                    <div style={{ fontWeight: 800, fontSize: "15px", marginBottom: "12px", color: "#ffffff", letterSpacing: "-0.01em", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "8px" }}>
+                        {tooltip.node.name || "Unnamed Node"}
                     </div>
 
-                    {tooltip.node.filepath && (tooltip.node.group === "image" || tooltip.node.group === "unknown") && (
-                        <div style={{ width: "100%", height: "180px", overflow: "hidden", borderRadius: "10px", backgroundColor: "black", marginBottom: "12px", position: "relative" }}>
+                    {tooltip.node.filepath && (
+                        <div style={{ width: "100%", height: "180px", overflow: "hidden", borderRadius: "12px", backgroundColor: "#000", marginBottom: "16px", border: "1px solid rgba(255,255,255,0.05)" }}>
                             <img
                                 src={`/api/image?path=${encodeURIComponent(tooltip.node.filepath)}&w=350`}
-                                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                 alt="preview"
                             />
                         </div>
                     )}
 
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
-                        {(tooltip.node.tags || "No Tags").split(",").slice(0, 4).map((t: string, idx: number) => (
-                            <span key={idx} style={{ fontSize: "10px", background: "rgba(255,255,255,0.12)", padding: "4px 8px", borderRadius: "6px", color: "#eee" }}>
-                                {t.trim() || "N/A"}
-                            </span>
-                        ))}
+                    <div style={{ marginBottom: "12px" }}>
+                        <div style={{ fontSize: "10px", color: "#888", textTransform: "uppercase", marginBottom: "4px", fontWeight: 700 }}>Categories</div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                            {(tooltip.node.tags || "Uncategorized").split(",").map((t: string, i: number) => (
+                                <span key={i} style={{ fontSize: "11px", background: "rgba(255,255,255,0.1)", padding: "4px 10px", borderRadius: "6px", color: "#fff" }}>
+                                    {t.trim()}
+                                </span>
+                            ))}
+                        </div>
                     </div>
 
                     {tooltip.node.description && (
-                        <div style={{
-                            color: "#ccc",
-                            lineHeight: "1.5",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                            fontSize: "11px"
-                        }}>
-                            {tooltip.node.description}
+                        <div>
+                            <div style={{ fontSize: "10px", color: "#888", textTransform: "uppercase", marginBottom: "4px", fontWeight: 700 }}>AI Analysis</div>
+                            <div style={{
+                                color: "#ddd",
+                                fontSize: "12px",
+                                lineHeight: "1.6",
+                                display: "-webkit-box",
+                                WebkitLineClamp: 4,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden"
+                            }}>
+                                {tooltip.node.description}
+                            </div>
                         </div>
                     )}
                 </div>
