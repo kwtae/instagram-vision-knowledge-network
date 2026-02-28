@@ -1,69 +1,78 @@
-# MCP Vision Knowledge Network
+# 🌌 Vision Knowledge Network (VKN) 
+> **AI 기반 공간 디자인 아카이빙 및 지식 그래프 시스템**
 
-An autonomous, local-first system that seamlessly ingests images, text, and documents, processes them using private Vision AI models, and builds a hierarchical, Obsidian-style interactive network graph.
+인스타그램, PDF, 이미지 등 흩어져 있는 디자인 영감들을 AI(LLaVA)가 스스로 분석하고, 의미적 연관성을 찾아 **Nebula 지식 그래프**로 시각화하는 로컬 퍼스트 AI 에이전트 시스템입니다.
 
-## Core Features
+---
 
-1. **Intelligent Auto-Scraping (Jitter & Fault Tolerance)**
-   - Includes a fully automated Instagram saved-post scraper designed to run indefinitely in the background.
-   - **Anti-Bot Mechanism**: Uses randomized delays (Jitter) between 8 to 15 minutes to mimic human behavior and evade rate limits.
-   - **Self-Healing**: Implements retry logic if network dropouts occur, preventing premature termination.
+## 🚀 시스템의 효용 (Value Proposition)
 
-2. **Perceptual Image Hashing (Duplicate Pruning)**
-   - Computes a perceptual hash (`phash`) of incoming images before they are passed to the LLM.
-   - Visually identical images (e.g., repeating backgrounds in carousels) are instantly identified and deleted, conserving disk space and drastically reducing GPU/LLM inference loads.
+1. **무한한 아카이빙의 자동화**: 수천 개의 인스타그램 저장물이나 디자인 레퍼런스를 일일이 분류할 필요가 없습니다. AI가 이미지의 '공간 DNA'를 읽고 자동으로 태깅합니다.
+2. **시각적 맥락 발견**: 단순한 폴더 구조를 넘어, 디자인 스타일(미니멀리즘, 재질, 조명 방식 등)이 유사한 데이터들을 그래프상에서 가깝게 배치하여 새로운 영감을 제안합니다.
+3. **개인 맞춤형 지식 체계**: 전용 대시보드(Next.js)를 통해 나만의 디자인 라이브러리를 Pinterest 스타일의 그리드 또는 인터랙티브한 성운(Nebula) 그래프로 탐색할 수 있습니다.
+4. **프라이버시 및 로컬 실행**: 모든 이미지 분석(LLM)과 데이터베이스(Vector DB)는 사용자의 로컬 환경에서 실행되어 데이터 외부 유출이 없으며 별도의 API 비용이 발생하지 않습니다.
 
-3. **Obsidian-Style Visualization (D3.js)**
-   - Generates an interactive web-based graph (`network_graph.html`) mirroring the minimalist aesthetics of Obsidian's Light Theme.
-   - Features dynamic node sizing based on degree centrality, modern minimalist color palettes, and a hidden, hover-activated toolbar.
-   - Dragged nodes maintain their coordinates (Sticky Nodes) allowing users to manually sculpt the graph structure over time.
+---
 
-4. **Manual Contextual Relinking**
-   - Enables users to define their own relationships between data nodes natively within the browser UI.
-   - **Shift+Click** sequentially on two distinct nodes will forge a custom edge, saving the new topology to the local database automatically.
+## 📸 인스타그램 '저장됨(Saved)' 데이터 수집 방법
 
-## System Architecture
+시스템은 사용자의 인스타그램 계정에서 '저장됨' 게시물을 자동으로 가져오는 스크래퍼를 포함하고 있습니다.
 
-- **Extraction Layer**: Playwright (Headless Web Automation), PyTesseract (OCR), PyMuPDF (PDF Extraction)
-- **Vision & LLM Layer**: Local Ollama Server running `gpt-oss:20b` for taxonomy classification and semantic image generation.
-- **Knowledge Base**: ChromaDB for vector storage and relationship inference based on cosine similarity of text embeddings.
-- **Presentation Layer**: D3.js and Vanilla CSS, hosted via an embedded real-time HTTP Node Server on port `8080`.
+### 1단계: 세션 쿠키 추출 (필수)
+인스타그램은 강력한 보안 정책을 가지고 있으므로, 브라우저의 로그인 세션을 공유해야 합니다.
+1. 크롬(Chrome) 브라우저에서 인스타그램에 로그인합니다.
+2. `EditThisCookie`와 같은 브라우저 확장 프로그램을 사용하여 쿠키를 **JSON 형식**으로 복사합니다.
+3. 프로젝트 루트 디렉토리에 `cookies.json` 파일을 생성하고 복사한 내용을 붙여넣습니다.
 
-## Installation & Deployment
+### 2단계: 스크래퍼 실행 모드
+상황에 따라 두 가지 방식의 스크래퍼를 활용할 수 있습니다.
 
-Ensure you have Python 3.10+ installed and a local instance of Ollama active on your machine.
+*   **A. 일반 스크래퍼 (`run_scraper.py`)**: 
+    최신 저장물부터 지정된 개수(기본 10개)만큼 빠르게 가져옵니다. 
+    ```bash
+    .\venv\Scripts\python.exe run_scraper.py
+    ```
+*   **B. 아카이브 전체 덤프 (`archival_scraper.py`)**: 
+    수년간 쌓인 모든 저장물을 한 번에 긁어오고 싶을 때 사용합니다. 무한 스크롤을 통해 전체 링크를 확보한 후 순차적으로 다운로드합니다.
+*   **C. 백그라운드 상시 가동 (`auto_scraper.py`)**: 
+    8~15분의 무작위 간격으로 새로운 저장물이 있는지 확인하여 실시간으로 아카이브를 동기화합니다.
 
-1. Clone the repository and navigate to the project root.
-2. Initialize your virtual environment and install dependencies:
-   ```bash
-   python -m venv venv
-   .\venv\Scripts\Activate
-   pip install -r requirements.txt
-   pip install imagehash scipy
-   ```
-3. Prepare the necessary token files. You must provide a valid `cookies.json` file in the root directory for Instagram authentication.
+---
 
-## Usage Guide
+## 🛠️ 사용 방법 (Usage Guide)
 
-You need two console windows to operate the full pipeline.
+시스템은 **데이터 처리 백엔드**와 **시각화 프론트엔드** 두 부분으로 구성됩니다.
 
-### 1. Database & Visualization Server
-Run the primary backend server which monitors files, processes them through the AI, and hosts the visualizer UI.
+### 1. 백엔드 서버 및 파일 모니터링 가동
+먼저 AI 엔진과 데이터베이스를 활성화합니다.
 ```bash
+# 1번 터미널
 .\venv\Scripts\python.exe main.py
 ```
-*Note: The frontend is accessible at `http://localhost:8080` (or by opening `network_graph.html` directly). Keep this running strictly in the background to handle the Two-Way binding updates for Tagging and Manual Relinking.*
+이 서버는 `watched_files/` 폴더를 실시간 감시합니다. 스크래퍼가 파일을 가져오거나 사용자가 직접 파일을 넣으면 즉시 AI 분석(LLaVA)을 시작하고 ChromaDB에 저장합니다.
 
-### 2. Autonomous Scraper
-In a separate terminal, launch the daemon that continuously feeds new data into the pipeline.
+### 2. 비전 대시보드 실행 (Next.js)
+수집된 데이터를 시각적으로 확인합니다.
 ```bash
-.\venv\Scripts\python.exe auto_scraper.py
+# 2번 터미널
+cd vision_dashboard
+npm run dev
 ```
-The scraper will fetch the latest saved entries, deposit them into the watched folder, and hibernate for a randomized interval to protect your account standing.
+접속 주소: `http://localhost:3000`
+*   **Grid View**: 수집된 이미지를 카테고리별로 필터링하여 확인합니다.
+*   **Graph View**: `/graph` 페이지에서 데이터 간의 유기적인 연결망을 탐색합니다.
 
-## Interaction Mechanics within the Graph
+---
 
-- **Search**: Hover over the top-left Search bar to reveal advanced details and toggle the Timeline view. Filtering strictly highlights relevant targets.
-- **Open Source File**: Standard Left-Click on a node.
-- **Edit Tags**: Right-Click on a node to update its semantic categories. Changes reflect instantly.
-- **Custom Links**: Hold `Shift` and Left-Click the Source Node, then hold `Shift` and Left-Click the Target Node. A dashed red line will instantly connect them, persisting across all future sessions.
+## 🕹️ 그래프 인터랙션 팁
+
+*   **노드 호버(Hover)**: 이미지 썸네일과 AI가 분석한 공간 분석 요약본을 즉시 확인합니다.
+*   **노드 클릭**: 해당 원본 파일(고해상도)을 브라우저 새 탭에서 엽니다.
+*   **줌/드래그**: 6,000개 이상의 노드를 끊김 없이 탐색할 수 있는 캔버스 기반 렌더링을 지원합니다. (줌 상태에서 노드를 가리켜도 화면이 튕기지 않도록 최적화됨)
+
+---
+
+## 🔒 보안 및 관리
+
+*   **개인정보**: `cookies.json`, `chroma_db/`, `watched_files/`는 `.gitignore`에 등록되어 깃허브에 공유되지 않도록 설정되어 있습니다.
+*   **경로 동기화**: 만약 로컬에서 파일을 직접 옮겼다면 `python sync_db_paths.py`를 실행하여 DB의 경로 정보를 일괄 수정할 수 있습니다.
