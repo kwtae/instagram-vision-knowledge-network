@@ -17,7 +17,7 @@ export default function GraphPage() {
     // Fetch data
     useEffect(() => {
         // Limit query to extremely speed up the initial load
-        fetch("/api/graph?limit=1500")
+        fetch("/api/graph?limit=800")
             .then(res => res.json())
             .then(json => {
                 if (json.success && json.nodes) {
@@ -230,60 +230,52 @@ export default function GraphPage() {
             {tooltip && (
                 <div style={{
                     position: "absolute",
-                    top: Math.min(tooltip.y + 15, window.innerHeight - 350),
-                    left: Math.min(tooltip.x + 15, window.innerWidth - 320),
+                    top: Math.min(tooltip.y + 10, window.innerHeight - 320),
+                    left: Math.min(tooltip.x + 10, window.innerWidth - 300),
                     pointerEvents: "none",
-                    background: "rgba(15, 15, 15, 0.85)",
+                    background: "#111111", // Solid high-contrast background
                     padding: "16px",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "16px",
+                    border: "1.5px solid #333", // Distinct border
+                    borderRadius: "12px",
                     fontFamily: "Inter, sans-serif",
-                    fontSize: "12px",
-                    width: "300px",
+                    width: "280px",
                     color: "white",
-                    zIndex: 100,
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-                    backdropFilter: "blur(20px)"
+                    zIndex: 9999, // Force to front
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.8)"
                 }}>
-                    <div style={{ fontWeight: 800, fontSize: "15px", marginBottom: "12px", color: "#ffffff", letterSpacing: "-0.01em", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "8px" }}>
-                        {tooltip.node.name || "Unnamed Node"}
+                    <div style={{ fontWeight: 700, fontSize: "14px", marginBottom: "8px", color: "#fff", borderBottom: "1px solid #222", paddingBottom: "6px" }}>
+                        {tooltip.node.name || "Untitled Node"}
                     </div>
 
                     {tooltip.node.filepath && (
-                        <div style={{ width: "100%", height: "180px", overflow: "hidden", borderRadius: "12px", backgroundColor: "#000", marginBottom: "16px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div style={{ width: "100%", height: "160px", overflow: "hidden", borderRadius: "8px", backgroundColor: "#000", marginBottom: "12px" }}>
                             <img
-                                src={`/api/image?path=${encodeURIComponent(tooltip.node.filepath)}&w=350`}
+                                src={`/api/image?path=${encodeURIComponent(tooltip.node.filepath)}&w=300`}
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                 alt="preview"
                             />
                         </div>
                     )}
 
-                    <div style={{ marginBottom: "12px" }}>
-                        <div style={{ fontSize: "10px", color: "#888", textTransform: "uppercase", marginBottom: "4px", fontWeight: 700 }}>Categories</div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                            {(tooltip.node.tags || "Uncategorized").split(",").map((t: string, i: number) => (
-                                <span key={i} style={{ fontSize: "11px", background: "rgba(255,255,255,0.1)", padding: "4px 10px", borderRadius: "6px", color: "#fff" }}>
-                                    {t.trim()}
-                                </span>
-                            ))}
-                        </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "10px" }}>
+                        {(tooltip.node.tags || "").split(",").slice(0, 3).map((t: string, i: number) => (
+                            <span key={i} style={{ fontSize: "11px", background: "#222", padding: "3px 8px", borderRadius: "4px", color: "#ccc" }}>
+                                {t.trim() || "Tag"}
+                            </span>
+                        ))}
                     </div>
 
                     {tooltip.node.description && (
-                        <div>
-                            <div style={{ fontSize: "10px", color: "#888", textTransform: "uppercase", marginBottom: "4px", fontWeight: 700 }}>AI Analysis</div>
-                            <div style={{
-                                color: "#ddd",
-                                fontSize: "12px",
-                                lineHeight: "1.6",
-                                display: "-webkit-box",
-                                WebkitLineClamp: 4,
-                                WebkitBoxOrient: "vertical",
-                                overflow: "hidden"
-                            }}>
-                                {tooltip.node.description}
-                            </div>
+                        <div style={{
+                            color: "#aaa",
+                            fontSize: "12px",
+                            lineHeight: "1.5",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden"
+                        }}>
+                            {tooltip.node.description}
                         </div>
                     )}
                 </div>

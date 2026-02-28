@@ -11,7 +11,7 @@ def main():
     sys.stdout.reconfigure(encoding='utf-8')
     try:
         distance_threshold = 0.5
-        limit = 500
+        limit = 800
         
         for arg in sys.argv[1:]:
             if arg.startswith("limit="):
@@ -43,7 +43,6 @@ def main():
             primary_tag = tags_list[0] if tags_list else "미분류"
             
             raw_doc = all_data["documents"][i] if all_data.get("documents") else ""
-            # Clean up the document to show only the main content
             clean_desc = raw_doc
             if "Content: " in raw_doc:
                 clean_desc = raw_doc.split("Content: ", 1)[-1].replace("Vision Description:\n", "").strip()
@@ -84,7 +83,7 @@ def main():
         if docs:
             results = db.collection.query(
                 query_texts=docs,
-                n_results=min(len(docs), 5) # Reduce from 10 to 5 for speed
+                n_results=3 # Reduce further to 3 for extreme performance
             )
             for i, query_id in enumerate(ids):
                 retrieved_ids = results["ids"][i]
