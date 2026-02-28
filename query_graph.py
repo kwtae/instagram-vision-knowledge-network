@@ -42,14 +42,20 @@ def main():
             tags_list = [t.strip() for t in tags_str.split(',') if t.strip()]
             primary_tag = tags_list[0] if tags_list else "미분류"
             
+            raw_doc = all_data["documents"][i] if all_data.get("documents") else ""
+            # Clean up the document to show only the main content
+            clean_desc = raw_doc
+            if "Content: " in raw_doc:
+                clean_desc = raw_doc.split("Content: ", 1)[-1].replace("Vision Description:\n", "").strip()
+            
             output_nodes.append({
                 "id": doc_id,
-                "name": label,
+                "name": label or doc_id,
                 "group": group,
                 "primaryTag": primary_tag,
                 "tags": tags_str,
                 "filepath": filepath,
-                "description": all_data["documents"][i] if all_data.get("documents") else ""
+                "description": clean_desc
             })
 
         # 2. Generate Category Hubs

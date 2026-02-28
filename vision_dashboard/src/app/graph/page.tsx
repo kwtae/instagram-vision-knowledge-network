@@ -245,12 +245,12 @@ export default function GraphPage() {
                     boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
                     backdropFilter: "blur(20px)"
                 }}>
-                    <div style={{ fontWeight: 600, fontSize: "14px", marginBottom: "6px", color: "#fff", letterSpacing: "-0.02em" }}>
-                        {tooltip.node.name || tooltip.node.id}
+                    <div style={{ fontWeight: 600, fontSize: "14px", marginBottom: "10px", color: "white", letterSpacing: "-0.01em", wordBreak: "break-all" }}>
+                        {tooltip.node.name || tooltip.node.id || "Unknown Object"}
                     </div>
 
-                    {tooltip.node.filepath && tooltip.node.group === "image" && (
-                        <div style={{ width: "100%", height: "180px", overflow: "hidden", borderRadius: "10px", backgroundColor: "#000", marginBottom: "12px", position: "relative" }}>
+                    {tooltip.node.filepath && (tooltip.node.group === "image" || tooltip.node.group === "unknown") && (
+                        <div style={{ width: "100%", height: "180px", overflow: "hidden", borderRadius: "10px", backgroundColor: "black", marginBottom: "12px", position: "relative" }}>
                             <img
                                 src={`/api/image?path=${encodeURIComponent(tooltip.node.filepath)}&w=350`}
                                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
@@ -259,24 +259,25 @@ export default function GraphPage() {
                         </div>
                     )}
 
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "12px" }}>
-                        {(tooltip.node.tags || "").split(",").slice(0, 3).map((t: string) => (
-                            <span key={t} style={{ fontSize: "10px", background: "rgba(255,255,255,0.08)", padding: "2px 6px", borderRadius: "4px", color: "#888" }}>
-                                {t.trim()}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
+                        {(tooltip.node.tags || "No Tags").split(",").slice(0, 4).map((t: string, idx: number) => (
+                            <span key={idx} style={{ fontSize: "10px", background: "rgba(255,255,255,0.12)", padding: "4px 8px", borderRadius: "6px", color: "#eee" }}>
+                                {t.trim() || "N/A"}
                             </span>
                         ))}
                     </div>
 
                     {tooltip.node.description && (
                         <div style={{
-                            color: "#aaa",
+                            color: "#ccc",
                             lineHeight: "1.5",
                             display: "-webkit-box",
                             WebkitLineClamp: 3,
                             WebkitBoxOrient: "vertical",
-                            overflow: "hidden"
+                            overflow: "hidden",
+                            fontSize: "11px"
                         }}>
-                            {tooltip.node.description.replace('Vision Description:\n', '')}
+                            {tooltip.node.description}
                         </div>
                     )}
                 </div>
