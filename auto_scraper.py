@@ -7,11 +7,11 @@ from instagram_scraper import scrape_saved_posts
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("mcp_vision_server.auto_scraper")
 
-async def auto_scrape(batch_size=50, max_batches=100):
+async def auto_scrape(batch_size=50, max_batches=10000):
     logger.info("Starting automated Instagram scraper.")
     logger.info(f"Configuration: {batch_size} items per batch.")
     
-    max_retries = 3
+    max_retries = 10
     consecutive_zeros = 0
     
     for i in range(max_batches):
@@ -35,9 +35,9 @@ async def auto_scrape(batch_size=50, max_batches=100):
         logger.info(f"Batch {i+1} completed. Downloaded {len(downloaded)} assets.")
         
         if i < max_batches - 1:
-            # Jitter implementation: Randomize sleep time between 8 and 15 minutes
-            sleep_sec = random.randint(480, 900)
-            logger.info(f"Initiating safety sleep for {sleep_sec // 60} minutes and {sleep_sec % 60} seconds...")
+            # Short sleep implementation: ~2 seconds
+            sleep_sec = random.randint(1, 3)
+            logger.info(f"Initiating short sleep for {sleep_sec} seconds...")
             await asyncio.sleep(sleep_sec)
             
     logger.info("Automated scraper process concluded.")

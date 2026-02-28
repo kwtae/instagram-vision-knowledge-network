@@ -75,33 +75,39 @@ async def scrape_saved_posts(limit: int = 10) -> list[str]:
                     pass
             logger.info(f"기존에 수집된 데이터 {len(processed_hrefs)}개를 기억하고 스킵합니다.")
             
-            link_index = 0
             download_count = 0
+            empty_scrolls = 0
             
             while download_count < limit:
-                # Re-query handles stale elements if DOM changes
                 links = await page.locator('a[href*="/p/"]').all()
-                if not links or len(links) <= link_index:
-                    # Scroll down or break if no more links
-                    await page.mouse.wheel(0, 1000)
-                    await asyncio.sleep(2)
-                    links = await page.locator('a[href*="/p/"]').all()
-                    if len(links) <= link_index:
+                unprocessed_link = None
+                href_to_process = None
+                
+                for link in links:
+                    href = await link.get_attribute("href")
+                    if href not in processed_hrefs:
+                        unprocessed_link = link
+                        href_to_process = href
                         break
                 
-                link = links[link_index]
-                href = await link.get_attribute("href")
-                
-                if href in processed_hrefs:
-                    link_index += 1
+                if not unprocessed_link:
+                    # Scroll down because we haven't found any new links in current view
+                    await page.mouse.wheel(0, 3000)
+                    await asyncio.sleep(2.5)
+                    empty_scrolls += 1
+                    if empty_scrolls > 20:
+                        logger.info("Reached the end of the saved feed (or max scrolls exceeded).")
+                        break
                     continue
-                    
-                processed_hrefs.add(href)
+                else:
+                    empty_scrolls = 0
+                
+                processed_hrefs.add(href_to_process)
                 
                 try:
                     # Scroll into view and click
-                    await link.scroll_into_view_if_needed()
-                    await link.click()
+                    await unprocessed_link.scroll_into_view_if_needed()
+                    await unprocessed_link.click()
                     
                     # Wait for modal dialog and inner article
                     modal = page.locator('div[role="dialog"] article')
@@ -140,7 +146,6 @@ async def scrape_saved_posts(limit: int = 10) -> list[str]:
                             break
                     
                     download_count += 1
-                    link_index += 1
                     
                     # 실시간 이력 저장
                     with open(HISTORY_FILE, "w", encoding="utf-8") as f:

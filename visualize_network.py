@@ -118,90 +118,112 @@ def generate_graph_html(output_path: str = "network_graph.html", distance_thresh
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         :root {{
-            --bg-color: #fdfdfd;
-            --grid-color: rgba(0, 0, 0, 0.03);
-            --border-color: #e5e5e5;
-            --text-normal: #333333;
-            --text-muted: #888888;
-            --accent-color: #bbbbbb;
+            --bg-color: #0d1117;
+            --grid-color: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(20, 24, 34, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-normal: #e0e6ed;
+            --text-muted: #8b949e;
+            --accent-color: #ffffff;
+            --accent-hover: #cccccc;
+            --btn-bg: rgba(255, 255, 255, 0.05);
+            --btn-hover: rgba(255, 255, 255, 0.1);
         }}
         body {{
             margin: 0;
             background-color: var(--bg-color);
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
             background-size: 30px 30px;
             color: var(--text-normal);
-            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Helvetica", "Noto Sans KR", "Noto Sans", sans-serif;
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
             overflow: hidden;
         }}
         svg {{ width: 100vw; height: 100vh; }}
-        #toolbar {{
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 260px;
-        }}
-        #searchInput {{
-            width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px); color: var(--text-normal); 
-            border: 1px solid var(--border-color); border-radius: 8px; 
-            font-size: 13px; outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-            transition: all 0.2s; font-family: inherit;
-        }}
-        #searchInput:focus {{ background: #fff; border-color: #aaa; box-shadow: 0 6px 16px rgba(0,0,0,0.08); }}
-        #searchInput::placeholder {{ color: #aaa; }}
         
-        .toolbar-extras {{
-            opacity: 0;
-            transform: translateY(-5px);
-            pointer-events: none;
+        #toolbar {{
+            position: absolute; top: 24px; left: 24px; z-index: 5;
+            display: flex; flex-direction: column; width: 300px;
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4); overflow: hidden;
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }}
-        #toolbar:hover .toolbar-extras {{
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
+        .toolbar-header {{ padding: 20px; border-bottom: 1px solid var(--border-color); }}
+        .toolbar-header h2 {{ margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.5px; color: #ffffff; display: flex; align-items: center; gap: 8px; }}
+        .toolbar-header p {{ margin: 8px 0 0 0; font-size: 11px; color: var(--text-muted); }}
+        .toolbar-search {{ padding: 16px 20px; border-bottom: 1px solid var(--border-color); }}
+        #searchInput {{
+            width: 100%; padding: 10px 14px; background: rgba(0, 0, 0, 0.2);
+            color: var(--text-normal); border: 1px solid var(--border-color); border-radius: 8px; 
+            font-size: 13px; outline: none; transition: all 0.2s ease; box-sizing: border-box;
         }}
-        .toolbar-extras p {{ margin: 0 0 10px 0; font-size: 11px; color: var(--text-muted); line-height: 1.5; }}
+        #searchInput:focus {{ background: rgba(0, 0, 0, 0.4); border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); }}
+        #searchInput::placeholder {{ color: #6e7681; }}
+        
+        .toolbar-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; }}
         button {{
-            width: 100%; padding: 8px; background: #f5f5f5; color: var(--text-normal); 
-            border: 1px solid var(--border-color); border-radius: 6px; font-size: 12px; 
-            cursor: pointer; transition: all 0.2s; font-family: inherit; font-weight: 500;
+            width: 100%; padding: 10px 12px; background: var(--btn-bg); color: var(--text-normal); 
+            border: 1px solid var(--glass-border); border-radius: 8px; font-size: 12px; cursor: pointer; 
+            transition: all 0.2s; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;
         }}
-        button:hover {{ background: #eaeaea; }}
-        .link {{ stroke: #ccc; stroke-opacity: 0.4; stroke-width: 1px; }}
-        .node text {{ pointer-events: none; text-shadow: 0 1px 3px rgba(255,255,255,0.8); }}
+        button:hover {{ background: var(--btn-hover); border-color: #555; color: #fff; }}
+        .action-primary {{ grid-column: span 2; background: rgba(255, 255, 255, 0.1); color: var(--accent-color); border-color: rgba(255, 255, 255, 0.2); }}
+        .action-primary:hover {{ background: rgba(255, 255, 255, 0.2); color: var(--accent-hover); border-color: rgba(255, 255, 255, 0.4); }}
+
         #tooltip {{
-            position: absolute; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
-            padding: 12px; border-radius: 8px; font-size: 12px; color: var(--text-normal);
+            position: absolute; background: rgba(20, 24, 34, 0.95); backdrop-filter: blur(12px);
+            padding: 16px; border-radius: 12px; font-size: 12px; color: var(--text-normal);
             pointer-events: none; display: none; max-width: 280px; z-index: 10;
-            border: 1px solid var(--border-color); box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            line-height: 1.5; font-family: inherit;
+            border: 1px solid var(--glass-border); box-shadow: 0 12px 32px rgba(0,0,0,0.5); line-height: 1.6; font-family: inherit;
         }}
-        #tooltip strong {{ color: #111; font-weight: 600; }}
+        #tooltip strong {{ color: #fff; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; display: block; margin-bottom: 2px; }}
+        
+        #chatbot {{
+            position: absolute; right: 24px; bottom: 24px; width: 360px; height: 500px;
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 16px; display: flex; flex-direction: column; 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5); z-index: 10; overflow: hidden; font-family: inherit; font-size: 13px;
+        }}
+        #chatHeader {{ padding: 16px; background: rgba(0,0,0,0.2); font-weight: 600; border-bottom: 1px solid var(--border-color); text-align: left; display: flex; align-items: center; gap: 8px; }}
+        #chatHeader::before {{ content: "✦"; color: var(--accent-color); }}
+        #chatMessages {{ flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }}
+        .msg {{ padding: 10px 14px; border-radius: 10px; max-width: 85%; line-height: 1.5; word-wrap: break-word; }}
+        .msg-user {{ align-self: flex-end; background: var(--accent-color); color: #fff; border-bottom-right-radius: 2px; }}
+        .msg-bot {{ align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #e0e6ed; border-bottom-left-radius: 2px; }}
+        #chatInputContainer {{ display: flex; padding: 12px 16px; border-top: 1px solid var(--border-color); background: rgba(0,0,0,0.2); }}
+        #chatInput {{ flex: 1; padding: 10px 14px; border: 1px solid var(--glass-border); border-radius: 8px; outline: none; font-family: inherit; background: rgba(0,0,0,0.3); color: #fff; box-sizing: border-box; }}
+        #chatInput:focus {{ border-color: var(--accent-color); }}
+        #chatSend {{ margin-left: 8px; padding: 10px 16px; background: var(--accent-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; transition: background 0.2s; }}
+        #chatSend:hover {{ background: var(--accent-hover); }}
     </style>
 </head>
 <body>
     <div id="toolbar">
-        <input type="text" id="searchInput" placeholder="Search... (Hover for menu)"/>
-        <div class="toolbar-extras">
-            <p>Nodes: {len(nodes)} | Edges: {len(edges)}<br/>* Click: Open File<br/>* Right Click: Edit Tags<br/>* Shift+Click (Two Nodes): Connect Manually</p>
-            <button id="toggleTimeline">Timeline Mode</button>
+        <div class="toolbar-header">
+            <h2>Graph Explorer</h2>
+            <p>{len(nodes)} Nodes · {len(edges)} Edges</p>
+        </div>
+        <div class="toolbar-search">
+            <input type="text" id="searchInput" placeholder="Search visual network..."/>
+        </div>
+        <div class="toolbar-grid">
+            <button id="toggleTimeline" class="action-primary">⏱ Timeline Mode</button>
+            <button onclick="alert('Click a node to open file.\\nRight-click to edit tags.\\nShift+Click two nodes to link manually.')">ℹ️ Help</button>
+            <button onclick="simulation.alpha(1).restart()">🔄 Refresh Layout</button>
         </div>
     </div>
     <div id="tooltip"></div>
+    <div id="chatbot">
+        <div id="chatHeader">로컬 지식 비서</div>
+        <div id="chatMessages">
+            <div class="msg msg-bot">네트워크 데이터베이스 안에서 무엇을 찾아드릴까요?</div>
+        </div>
+        <div id="chatInputContainer">
+            <input type="text" id="chatInput" placeholder="질문 입력..." onkeypress="if(event.key==='Enter') sendChat()"/>
+            <button id="chatSend" onclick="sendChat()">전송</button>
+        </div>
+    </div>
     <svg>
         <defs>
             <clipPath id="circle-clip">
@@ -276,8 +298,8 @@ def generate_graph_html(output_path: str = "network_graph.html", distance_thresh
             .force("center", d3.forceCenter(width / 2, height / 2))
             .force("collide", d3.forceCollide().radius(d => getNodeRadius(d) + 20).iterations(3));
 
-        // Modern Japanese minimalist colors (Sumi, Sakura, Moegi, Rikyucha, Yamabuki, Sora, Fuji, etc)
-        const customColors = ["#899b9e", "#d89e9e", "#86a982", "#bba785", "#70899c", "#b695a5", "#a7a17a", "#738b81", "#cca598", "#888888"];
+        // Grayscale hierarchy palette
+        const customColors = ["#ffffff", "#f0f0f0", "#e0e0e0", "#d0d0d0", "#cccccc", "#bcbcbc", "#aaaaaa", "#999999", "#888888", "#777777"];
         const colorScale = d3.scaleOrdinal(customColors);
 
         const container = svg.select(".container");
@@ -288,8 +310,8 @@ def generate_graph_html(output_path: str = "network_graph.html", distance_thresh
             .data(graph.links)
             .enter().append("line")
             .attr("class", "link")
-            .attr("stroke", d => d.isCustom ? "#ff6b81" : (d.isCategoryLink ? "#d8d8d8" : "#ebebeb"))
-            .attr("stroke-width", d => d.isCustom ? 2.0 : (d.isCategoryLink ? 1.0 : 0.4))
+            .attr("stroke", d => d.isCustom ? "#ffffff" : (d.isCategoryLink ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)"))
+            .attr("stroke-width", d => d.isCustom ? 2.0 : (d.isCategoryLink ? 1.5 : 0.8))
             .attr("stroke-dasharray", d => d.isCustom ? "4,4" : "none")
             .attr("stroke-opacity", d => d.isCustom ? 1.0 : (d.isCategoryLink ? 0.8 : 0.4));
 
@@ -306,20 +328,24 @@ def generate_graph_html(output_path: str = "network_graph.html", distance_thresh
 
         node.append("circle")
             .attr("r", d => getNodeRadius(d))
-            .attr("fill", d => d.isCategory ? colorScale(d.primaryTag) : d3.color(colorScale(d.primaryTag)).brighter(0.4))
-            .attr("opacity", d => d.isCategory ? 0.95 : 0.8)
-            .attr("stroke", d => d.isCategory ? d3.color(colorScale(d.primaryTag)).darker(0.3) : "none")
-            .attr("stroke-width", d => d.isCategory ? "1.5px" : "0");
+            .attr("fill", d => d.isCategory ? "#ffffff" : d3.color("#ffffff").darker(d.degree > 3 ? 1.5 : 3.0)) // Highlight high-degree files naturally
+            .attr("opacity", d => d.isCategory ? 1.0 : 0.8)
+            .attr("stroke", d => d.isCategory ? "#ffffff" : "none")
+            .attr("stroke-width", d => d.isCategory ? "2px" : "0")
+            .style("filter", d => d.isCategory ? `drop-shadow(0 0 16px rgba(255,255,255,0.6))` : "none");
 
-        // Clean Obsidian Labels
+        // Clean Obsidian Labels + Galaxy Naming
         node.append("text")
-            .attr("dx", d => getNodeRadius(d) + 8)
-            .attr("dy", ".35em")
-            .style("fill", d => d.isCategory ? d3.color(colorScale(d.primaryTag)).darker(0.6) : "#999")
+            .attr("text-anchor", d => d.isCategory ? "middle" : "start")
+            .attr("alignment-baseline", d => d.isCategory ? "central" : "auto")
+            .attr("dx", d => d.isCategory ? 0 : getNodeRadius(d) + 8)
+            .attr("dy", d => d.isCategory ? 0 : ".35em")
+            .style("fill", d => d.isCategory ? "#000000" : "#a0a0a0")
             .style("font-size", d => d.isCategory ? "16px" : "11px")
-            .style("font-weight", d => d.isCategory ? "600" : "normal")
-            .style("opacity", d => d.isCategory ? 1 : 0) // Hide file labels initially to prevent mess
-            .text(d => d.isCategory ? d.label : (d.label.length > 20 ? d.label.substring(0,20)+"..." : d.label));
+            .style("font-weight", d => d.isCategory ? "800" : "500")
+            .style("letter-spacing", d => d.isCategory ? "1px" : "0.5px")
+            .style("opacity", d => d.isCategory ? 1.0 : 0) // Hide file labels by default
+            .text(d => d.isCategory ? d.label.toUpperCase() : (d.label.length > 20 ? d.label.substring(0,20)+"..." : d.label));
 
         // Search filtering
         d3.select("#searchInput").on("input", function() {{
@@ -350,14 +376,14 @@ def generate_graph_html(output_path: str = "network_graph.html", distance_thresh
                           .force("charge", d3.forceManyBody().strength(-30))
                           .force("collide", d3.forceCollide().radius(d => getNodeRadius(d) + 2));
                           
-                d3.select(this).text("🌌 별자리 모드 전환").style("background", "#ff6b6b");
+                d3.select(this).text("🌌 Nebula View").style("background", "rgba(255, 255, 255, 0.1)").style("color", "#fff").style("border-color", "rgba(255, 255, 255, 0.2)");
             }} else {{
                 simulation.force("x", d3.forceX(width/2).strength(0.05))
                           .force("y", d3.forceY(height/2).strength(0.05))
                           .force("charge", d3.forceManyBody().strength(d => d.isCategory ? -900 : -50))
                           .force("collide", d3.forceCollide().radius(d => getNodeRadius(d) + 5));
                           
-                d3.select(this).text("Timeline Mode").style("background", "#4db8ff").style("color", "#000");
+                d3.select(this).text("⏱ Timeline Mode").style("background", "rgba(255, 255, 255, 0.1)").style("color", "#aaa").style("border-color", "rgba(255, 255, 255, 0.2)");
             }}
             simulation.alpha(1).restart();
         }});
@@ -365,29 +391,35 @@ def generate_graph_html(output_path: str = "network_graph.html", distance_thresh
         // Hover & Tooltip Events
         node.on("mouseover", function(event, d) {{
                 // Highlight connected links
-                link.style("stroke", l => (l.source.id === d.id || l.target.id === d.id) ? colorScale(d.primaryTag) : (l.isCategoryLink ? "#d8d8d8" : "#ebebeb"))
-                    .style("stroke-opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.1);
+                link.style("stroke", l => (l.source.id === d.id || l.target.id === d.id) ? "#ffffff" : (l.isCategoryLink ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)"))
+                    .style("stroke-opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.05);
 
                 // Highlight node and show label
-                d3.select(this).select("circle").attr("stroke", "#444").attr("stroke-width", "2px");
-                d3.select(this).select("text").style("opacity", 1).style("fill", "#222");
+                d3.select(this).select("circle").attr("stroke", "#ffffff").attr("stroke-width", "2px").attr("opacity", 1);
+                d3.select(this).select("text").style("opacity", 1).style("fill", "#ffffff").style("text-shadow", `0 2px 8px rgba(255,255,255,0.8)`);
 
-                let thumbHtml = d.thumbnail ? `<br/><img src="${{d.thumbnail}}" style="border-radius:6px; max-width:80px; margin-top:8px; border: 1px solid #ddd;">` : "";
+                let thumbHtml = d.thumbnail ? `<br/><img src="${{d.thumbnail}}" style="border-radius:6px; max-width:120px; margin-top:8px; border: 1px solid rgba(255,255,255,0.1);">` : "";
                 
                 tooltip.style("display", "block")
-                    .html(`<strong>${{d.isCategory ? 'Category' : 'File'}}:</strong> ${{d.label}}<br/><strong>Tags:</strong> ${{d.tags}}${{!d.isCategory ? '<br/><em>우클릭하여 태그 편집</em>' : ''}}${{thumbHtml}}`)
+                    .html(`<strong>${{d.isCategory ? 'Category' : 'File'}}</strong> ${{d.label}}<br/><span style="color:#aaa; font-size:10px;">Tags: ${{d.tags}}</span>${{!d.isCategory ? '<br/><span style="color:#888; font-size:10px;">우클릭하여 태그 편집</span>' : ''}}${{thumbHtml}}`)
                     .style("left", (event.pageX + 15) + "px")
                     .style("top", (event.pageY + 15) + "px");
             }})
             .on("mouseout", function(event, d) {{
                 // Reset links
-                link.style("stroke", l => l.isCustom ? "#ff6b81" : (l.isCategoryLink ? "#d8d8d8" : "#ebebeb"))
+                link.style("stroke", l => l.isCustom ? "#ffffff" : (l.isCategoryLink ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)"))
                     .style("stroke-opacity", l => l.isCustom ? 1.0 : (l.isCategoryLink ? 0.8 : 0.4));
 
                 // Reset node
                 if(window.selectedSourceNode && d.id === window.selectedSourceNode.id) return; // Keep selection highlighted
-                d3.select(this).select("circle").attr("stroke", n => n.isCategory ? d3.color(colorScale(n.primaryTag)).darker(0.3) : "none").attr("stroke-width", n => n.isCategory ? "1.5px" : "0");
-                d3.select(this).select("text").style("opacity", n => n.isCategory ? 1 : 0).style("fill", n => n.isCategory ? d3.color(colorScale(n.primaryTag)).darker(0.6) : "#999");
+                d3.select(this).select("circle")
+                    .attr("stroke", n => n.isCategory ? "#ffffff" : "none")
+                    .attr("stroke-width", n => n.isCategory ? "2px" : "0")
+                    .attr("opacity", n => n.isCategory ? 1.0 : 0.8);
+                d3.select(this).select("text")
+                    .style("opacity", n => n.isCategory ? 1.0 : 0)
+                    .style("fill", n => n.isCategory ? "#000000" : "#a0a0a0")
+                    .style("text-shadow", "none");
                 
                 tooltip.style("display", "none");
             }})
@@ -423,7 +455,12 @@ def generate_graph_html(output_path: str = "network_graph.html", distance_thresh
                 }}
 
                 if(d.filepath && d.filepath !== "Unknown") {{
-                    window.open('file:///' + d.filepath, '_blank');
+                    fetch(`http://localhost:8080/api/open`, {{
+                        method: "POST",
+                        headers: {{ "Content-Type": "application/json" }},
+                        body: JSON.stringify({{ filepath: d.filepath }})
+                    }})
+                    .catch(err => alert("파일을 여는 중 서버 오류가 발생했습니다. (보안 정책 등으로 차단될 수 있음)"));
                 }} else {{
                     alert("파일 경로를 찾을 수 없습니다.");
                 }}
@@ -478,6 +515,37 @@ def generate_graph_html(output_path: str = "network_graph.html", distance_thresh
         function dragended(event, d) {{
             if (!event.active) simulation.alphaTarget(0);
             // Sticky nodes: Intentionally NOT resetting d.fx/d.fy so manual clustering is saved per session
+        }}
+
+        async function sendChat() {{
+            const input = document.getElementById("chatInput");
+            const container = document.getElementById("chatMessages");
+            const text = input.value.trim();
+            if(!text) return;
+            
+            container.innerHTML += `<div class="msg msg-user">${{text}}</div>`;
+            input.value = "";
+            const loadingId = "loading" + Date.now();
+            container.innerHTML += `<div class="msg msg-bot" id="${{loadingId}}">로컬 DB 탐색 중...</div>`;
+            container.scrollTop = container.scrollHeight;
+            
+            try {{
+                const res = await fetch("http://localhost:8080/api/chat", {{
+                    method: "POST",
+                    headers: {{"Content-Type": "application/json"}},
+                    body: JSON.stringify({{query: text}})
+                }});
+                const data = await res.json();
+                document.getElementById(loadingId).remove();
+                
+                // Markdown or simple line breaks
+                const formattedRes = (data.response || "결과를 찾을 수 없습니다.").replace(/\\n/g, '<br/>');
+                container.innerHTML += `<div class="msg msg-bot">${{formattedRes}}</div>`;
+                container.scrollTop = container.scrollHeight;
+            }} catch(e) {{
+                if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+                container.innerHTML += `<div class="msg msg-bot" style="color:red">통신 오류가 발생했습니다. AI 서버가 켜져있는지 확인하세요.</div>`;
+            }}
         }}
     </script>
 </body>
@@ -578,6 +646,70 @@ class GraphRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return
             except Exception as e:
                 logger.error(f"POST Link Error: {e}")
+                self.send_response(500)
+                self.end_headers()
+
+        elif self.path == '/api/open':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_data)
+                filepath = data.get("filepath")
+                if filepath and os.path.exists(filepath):
+                    # Use OS default handler to open the file
+                    os.startfile(filepath)
+                
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True}).encode())
+                return
+            except Exception as e:
+                logger.error(f"POST Open Error: {e}")
+                self.send_response(500)
+                self.end_headers()
+
+        elif self.path == '/api/chat':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            from db_manager import db
+            import requests
+            try:
+                data = json.loads(post_data)
+                query = data.get("query", "")
+                
+                results = db.search_similar(query, n_results=5)
+                context_str = ""
+                if results:
+                    docs = []
+                    for r in results:
+                        docs.append(f"태그: {r['metadata'].get('tags', '')}\n경로: {r['metadata'].get('filepath', '')}")
+                    context_str = "\n\n".join(docs)
+                
+                if context_str:
+                    prompt = f"당신은 스마트한 개인 지식 비서입니다. 아래의 정보 추출 결과를 바탕으로 사용자의 질문에 한국어로 친절하고 전문적으로 대답하세요. 파일 경로가 있으면 레퍼런스로 같이 언급하세요.\n\n[데이터베이스 검색 결과]\n{context_str}\n\n[사용자 질문]\n{query}"
+                else:
+                    prompt = f"사용자 질문: {query}\n현재 연관된 파일이 부족합니다. 있는 지식 한도 내에서 대답하되 정보가 부족함을 알리세요."
+                
+                url = "http://localhost:11434/api/generate"
+                payload = {
+                    "model": "llava:7b",
+                    "prompt": prompt,
+                    "stream": False
+                }
+                response = requests.post(url, json=payload, timeout=60)
+                response.raise_for_status()
+                ans = response.json().get("response", "")
+                
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"response": ans}).encode('utf-8'))
+                return
+            except Exception as e:
+                logger.error(f"POST Chat Error: {e}")
                 self.send_response(500)
                 self.end_headers()
                 

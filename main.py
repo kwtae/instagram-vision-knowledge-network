@@ -88,8 +88,22 @@ async def build_network_graph_html(distance_threshold: float = 0.5) -> str:
 def main():
     logger.info("MCP 비전 서버가 시작되었습니다.")
     
-    # 백그라운드 모니터링 시작 (예: "./watched_files" 디렉토리)
+    # Init directory if it doesn't exist
+    import os
+    if not os.path.exists("./watched_files"):
+        os.makedirs("./watched_files")
+
+    # Retroactively scan existing backlog files that were downloaded while the server was down/restarting
+    from file_manager import scan_directory_once
     import threading
+    def initial_scan():
+        logger.info("Starting initial backlog scan of existing files...")
+        scan_directory_once("./watched_files")
+        logger.info("Initial backlog scan complete.")
+        
+    threading.Thread(target=initial_scan, daemon=True).start()
+    
+    # 백그라운드 모니터링 시작 (새로 생성되는 파일 감시)
     monitor = DirectoryMonitor("./watched_files")
     monitor.start()
     
