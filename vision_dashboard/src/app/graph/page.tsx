@@ -98,8 +98,9 @@ export default function GraphPage() {
         ctx.stroke();
 
         // Draw Nodes
+        const curHoveredId = hoveredNode?.id; // Access current snapshot
         nodesRef.current.forEach((node: any) => {
-            const isHovered = hoveredNode?.id === node.id;
+            const isHovered = curHoveredId === node.id;
             const isCategory = node.group === "category";
 
             const r = isCategory ? 12 : (isHovered ? 9 : 3.5);
@@ -161,8 +162,6 @@ export default function GraphPage() {
             });
 
         d3.select(canvas).call(zoom);
-        // Remove the forced transition here as it resets state incorrectly
-        // d3.select(canvas).transition().duration(1500).call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.2).translate(-width / 2, -height / 2));
 
         // Interaction Handling
         d3.select(canvas).on("mousemove", (e) => {
@@ -184,30 +183,30 @@ export default function GraphPage() {
                 }
             }
 
-            if (foundNode?.id !== hoveredNode?.id) {
+            if (foundNode?.id !== hoveredNodeRef.current?.id) {
                 if (foundNode) {
                     simulationRef.current?.stop();
                 } else {
                     simulationRef.current?.alpha(0.01).restart();
                 }
-                setHoveredNode(foundNode);
-                if (foundNode) {
-                    setTooltip({ node: foundNode, x: mx, y: my });
-                } else {
-                    setTooltip(null);
-                }
+                hoveredNodeRef.current = foundNode;
+                setHoveredNode(foundNode); // Trigger local label highlight
+                setTooltip(foundNode ? { node: foundNode, x: mx, y: my } : null);
             } else if (foundNode) {
                 setTooltip({ node: foundNode, x: mx, y: my });
             }
         });
 
         d3.select(canvas).on("click", (e) => {
-            if (hoveredNode && hoveredNode.filepath && !hoveredNode.isCategory) {
-                window.open(`/api/image?path=${encodeURIComponent(hoveredNode.filepath)}`, '_blank');
+            const currentHovered = hoveredNodeRef.current;
+            if (currentHovered && currentHovered.filepath && !currentHovered.isCategory) {
+                window.open(`/api/image?path=${encodeURIComponent(currentHovered.filepath)}`, '_blank');
             }
         });
 
-    }, [loading, render, hoveredNode]);
+    }, [loading]); // Only run once after loading finishes
+
+    const hoveredNodeRef = useRef<any>(null);
 
     return (
         <div style={{ width: "100%", height: "100vh", position: "relative", backgroundColor: "#0a0a0a", overflow: "hidden" }}>
@@ -227,57 +226,66 @@ export default function GraphPage() {
                 <canvas ref={canvasRef} style={{ display: "block" }} />
             )}
 
-            {tooltip && (
+            <GraphTooltip tooltip={tooltip} />
+        </div>
+    );
+}
+
+function GraphTooltip({ tooltip }: { tooltip: any }) {
+    if (!tooltip) return null;
+
+    const { node, x, y } = tooltip;
+    const isImage = node.group === "image" || node.group === "unknown";
+
+    return (
+        <div style={{
+            position: "absolute",
+            top: Math.min(y + 15, window.innerHeight - 380),
+            left: Math.min(x + 15, window.innerWidth - 320),
+            pointerEvents: "none",
+            backgroundColor: "#161616", // Solid dark background
+            padding: "16px",
+            border: "1px solid #333",
+            borderRadius: "16px",
+            fontFamily: "Inter, sans-serif",
+            width: "300px",
+            color: "white",
+            zIndex: 9999,
+            boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
+        }}>
+            <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "12px", color: "#ffffff", borderBottom: "1px solid #333", paddingBottom: "8px", wordBreak: "break-all" }}>
+                {node.name || node.id || "Document"}
+            </div>
+
+            {node.filepath && isImage && (
+                <div style={{ width: "100%", height: "180px", overflow: "hidden", borderRadius: "10px", backgroundColor: "#000", marginBottom: "12px", border: "1px solid #222" }}>
+                    <img
+                        src={`/api/image?path=${encodeURIComponent(node.filepath)}&w=350`}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                        alt="preview"
+                    />
+                </div>
+            )}
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
+                {(node.tags || "No Tags").split(",").slice(0, 4).map((t: string, idx: number) => (
+                    <span key={idx} style={{ fontSize: "10px", background: "#222", padding: "4px 8px", borderRadius: "6px", color: "#eee", border: "1px solid #333" }}>
+                        {t.trim() || "N/A"}
+                    </span>
+                ))}
+            </div>
+
+            {node.description && (
                 <div style={{
-                    position: "absolute",
-                    top: Math.min(tooltip.y + 10, window.innerHeight - 320),
-                    left: Math.min(tooltip.x + 10, window.innerWidth - 300),
-                    pointerEvents: "none",
-                    background: "#111111", // Solid high-contrast background
-                    padding: "16px",
-                    border: "1.5px solid #333", // Distinct border
-                    borderRadius: "12px",
-                    fontFamily: "Inter, sans-serif",
-                    width: "280px",
-                    color: "white",
-                    zIndex: 9999, // Force to front
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.8)"
+                    color: "#bbb",
+                    lineHeight: "1.6",
+                    fontSize: "12px",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden"
                 }}>
-                    <div style={{ fontWeight: 700, fontSize: "14px", marginBottom: "8px", color: "#fff", borderBottom: "1px solid #222", paddingBottom: "6px" }}>
-                        {tooltip.node.name || "Untitled Node"}
-                    </div>
-
-                    {tooltip.node.filepath && (
-                        <div style={{ width: "100%", height: "160px", overflow: "hidden", borderRadius: "8px", backgroundColor: "#000", marginBottom: "12px" }}>
-                            <img
-                                src={`/api/image?path=${encodeURIComponent(tooltip.node.filepath)}&w=300`}
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                alt="preview"
-                            />
-                        </div>
-                    )}
-
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "10px" }}>
-                        {(tooltip.node.tags || "").split(",").slice(0, 3).map((t: string, i: number) => (
-                            <span key={i} style={{ fontSize: "11px", background: "#222", padding: "3px 8px", borderRadius: "4px", color: "#ccc" }}>
-                                {t.trim() || "Tag"}
-                            </span>
-                        ))}
-                    </div>
-
-                    {tooltip.node.description && (
-                        <div style={{
-                            color: "#aaa",
-                            fontSize: "12px",
-                            lineHeight: "1.5",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden"
-                        }}>
-                            {tooltip.node.description}
-                        </div>
-                    )}
+                    {node.description}
                 </div>
             )}
         </div>
